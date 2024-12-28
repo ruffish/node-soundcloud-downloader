@@ -39,7 +39,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var m3u8stream_1 = __importDefault(require("m3u8stream"));
 var protocols_1 = __importDefault(require("./protocols"));
 var util_1 = require("./util");
@@ -66,7 +66,7 @@ var fromMedia = function (media, clientID, axiosInstance) { return __awaiter(voi
                 res = _a.sent();
                 if (!res.data.url)
                     throw new Error("Invalid response from Soundcloud. Check if the URL provided is correct: " + link);
-                if (!(media.format.protocol === protocols_1["default"].PROGRESSIVE)) return [3 /*break*/, 4];
+                if (!(media.format.protocol === protocols_1.default.PROGRESSIVE)) return [3 /*break*/, 4];
                 return [4 /*yield*/, axiosInstance.get(res.data.url, {
                         withCredentials: true,
                         responseType: 'stream'
@@ -74,7 +74,7 @@ var fromMedia = function (media, clientID, axiosInstance) { return __awaiter(voi
             case 3:
                 r = _a.sent();
                 return [2 /*return*/, r.data];
-            case 4: return [2 /*return*/, m3u8stream_1["default"](res.data.url)];
+            case 4: return [2 /*return*/, m3u8stream_1.default(res.data.url)];
             case 5:
                 err_1 = _a.sent();
                 throw util_1.handleRequestErrs(err_1);
@@ -87,4 +87,5 @@ var validatemedia = function (media) {
         return false;
     return true;
 };
-exports["default"] = fromMedia;
+exports.default = fromMedia;
+//# sourceMappingURL=download-media.js.map

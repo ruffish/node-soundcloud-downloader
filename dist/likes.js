@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLikes = void 0;
 var util_1 = require("./util");
 var baseURL = 'https://api-v2.soundcloud.com/users/';
@@ -100,3 +100,4 @@ var getLikes = function (options, clientID, axiosInstance) { return __awaiter(vo
     });
 }); };
 exports.getLikes = getLikes;
+//# sourceMappingURL=likes.js.map

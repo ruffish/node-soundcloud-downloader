@@ -39,8 +39,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.__esModule = true;
-exports.download = exports.fromDownloadLink = exports.fromMediaObj = exports.fromMediaObjBase = exports.fromURL = exports.fromURLBase = exports.getHLSStream = exports.getProgressiveStream = exports.getMediaURL = void 0;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getMediaUrlOnly = exports.download = exports.fromDownloadLink = exports.fromMediaObj = exports.fromMediaObjBase = exports.fromURL = exports.fromURLBase = exports.getHLSStream = exports.getProgressiveStream = exports.getMediaURL = void 0;
 var m3u8stream_1 = __importDefault(require("m3u8stream"));
 var util_1 = require("./util");
 var info_1 = __importDefault(require("./info"));
@@ -69,10 +69,12 @@ var getProgressiveStream = function (mediaUrl, axiosInstance) { return __awaiter
     var r;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, axiosInstance.get(mediaUrl, {
-                    withCredentials: true,
-                    responseType: 'stream'
-                })];
+            case 0:
+                console.log("Requesting progressive stream:", mediaUrl);
+                return [4 /*yield*/, axiosInstance.get(mediaUrl, {
+                        withCredentials: true,
+                        responseType: 'stream'
+                    })];
             case 1:
                 r = _a.sent();
                 return [2 /*return*/, r.data];
@@ -80,7 +82,16 @@ var getProgressiveStream = function (mediaUrl, axiosInstance) { return __awaiter
     });
 }); };
 exports.getProgressiveStream = getProgressiveStream;
-var getHLSStream = function (mediaUrl) { return m3u8stream_1["default"](mediaUrl); };
+var getHLSStream = function (mediaUrl) {
+    console.log("Requesting HLS stream:", mediaUrl);
+    return m3u8stream_1.default(mediaUrl)
+        .on('response', function (response) {
+        console.log("HLS stream response status:", response.statusCode);
+    })
+        .on('error', function (error) {
+        console.error("HLS stream error:", error.message);
+    });
+};
 exports.getHLSStream = getHLSStream;
 var fromURLBase = function (url, clientID, getMediaURLFunction, getProgressiveStreamFunction, getHLSStreamFunction, axiosInstance) { return __awaiter(void 0, void 0, void 0, function () {
     var mediaUrl, err_1;
@@ -116,6 +127,8 @@ var fromMediaObjBase = function (media, clientID, getMediaURLFunction, getProgre
             case 0:
                 if (!validatemedia(media))
                     throw new Error('Invalid media object provided');
+                console.log("Media object transcodings:", JSON.stringify(media, null, 2));
+                console.log("Media URL: ", media.url);
                 return [4 /*yield*/, fromURLFunction(media.url, clientID, axiosInstance)];
             case 1: return [2 /*return*/, _a.sent()];
         }
@@ -148,12 +161,12 @@ var fromDownloadLink = function (id, clientID, axiosInstance) { return __awaiter
 exports.fromDownloadLink = fromDownloadLink;
 /** @internal */
 var download = function (url, clientID, axiosInstance, useDownloadLink) {
-    if (useDownloadLink === void 0) { useDownloadLink = true; }
+    if (useDownloadLink === void 0) { useDownloadLink = false; }
     return __awaiter(void 0, void 0, void 0, function () {
-        var info, err_2;
+        var info, err_2, compatibleTranscoding;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, info_1["default"](url, clientID, axiosInstance)];
+                case 0: return [4 /*yield*/, info_1.default(url, clientID, axiosInstance)];
                 case 1:
                     info = _a.sent();
                     if (!(info.downloadable && useDownloadLink)) return [3 /*break*/, 5];
@@ -164,16 +177,57 @@ var download = function (url, clientID, axiosInstance, useDownloadLink) {
                 case 3: return [2 /*return*/, _a.sent()];
                 case 4:
                     err_2 = _a.sent();
+                    console.error("Error with direct download:", err_2.message);
                     return [3 /*break*/, 5];
-                case 5: return [4 /*yield*/, exports.fromMediaObj(info.media.transcodings[0], clientID, axiosInstance)];
-                case 6: return [2 /*return*/, _a.sent()];
+                case 5:
+                    compatibleTranscoding = info.media.transcodings.find(function (transcoding) {
+                        return transcoding.format.protocol === "progressive" || transcoding.format.protocol === "hls";
+                    });
+                    if (!compatibleTranscoding) {
+                        throw new Error("No compatible transcoding found (progressive or hls).");
+                    }
+                    console.log("Using transcoding: " + JSON.stringify(compatibleTranscoding, null, 2));
+                    return [4 /*yield*/, exports.fromMediaObj(compatibleTranscoding, clientID, axiosInstance)];
+                case 6: 
+                // Use the found transcoding
+                return [2 /*return*/, _a.sent()];
             }
         });
     });
 };
 exports.download = download;
 var validatemedia = function (media) {
-    if (!media.url || !media.format)
+    if (!media.url || !media.format) {
+        console.error("Invalid media object:", media);
         return false;
+    }
+    console.log("Valid media object:", media);
     return true;
 };
+/**
+ * Return the media.url for a track, using the same signature as `download`.
+ */
+var getMediaUrlOnly = function (url, clientID, axiosInstance, useDownloadLink) {
+    if (useDownloadLink === void 0) { useDownloadLink = false; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var info, compatibleTranscoding, mediaUrl;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, info_1.default(url, clientID, axiosInstance)];
+                case 1:
+                    info = _a.sent();
+                    compatibleTranscoding = info.media.transcodings.find(function (transcoding) {
+                        return transcoding.format.protocol === 'progressive' ||
+                            transcoding.format.protocol === 'hls';
+                    });
+                    if (!compatibleTranscoding) {
+                        throw new Error('No compatible transcoding found (progressive or hls).');
+                    }
+                    mediaUrl = exports.getMediaURL(compatibleTranscoding.url, clientID, axiosInstance);
+                    return [2 /*return*/, mediaUrl];
+            }
+        });
+    });
+};
+exports.getMediaUrlOnly = getMediaUrlOnly;
+//# sourceMappingURL=download.js.map

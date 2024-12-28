@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertFirebaseURL = exports.isFirebaseURL = exports.stripMobilePrefix = exports.isPersonalizedTrackURL = exports.isPlaylistURL = void 0;
 /** @internal @packageDocumentation */
 var regexp = /^https?:\/\/(soundcloud\.com)\/(.*)$/;
@@ -112,4 +112,5 @@ var convertFirebaseURL = function (url, axiosInstance) { return __awaiter(void 0
     });
 }); };
 exports.convertFirebaseURL = convertFirebaseURL;
-exports["default"] = isURL;
+exports.default = isURL;
+//# sourceMappingURL=url.js.map

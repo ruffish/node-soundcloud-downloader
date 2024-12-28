@@ -39,7 +39,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var m3u8stream_1 = __importDefault(require("m3u8stream"));
 var util_1 = require("./util");
 var fromURL = function (url, clientID, axiosInstance) { return __awaiter(void 0, void 0, void 0, function () {
@@ -69,7 +69,7 @@ var fromURL = function (url, clientID, axiosInstance) { return __awaiter(void 0,
             case 2:
                 r = _a.sent();
                 return [2 /*return*/, r.data];
-            case 3: return [2 /*return*/, m3u8stream_1["default"](res.data.url)];
+            case 3: return [2 /*return*/, m3u8stream_1.default(res.data.url)];
             case 4:
                 err_1 = _a.sent();
                 throw util_1.handleRequestErrs(err_1);
@@ -77,4 +77,5 @@ var fromURL = function (url, clientID, axiosInstance) { return __awaiter(void 0,
         }
     });
 }); };
-exports["default"] = fromURL;
+exports.default = fromURL;
+//# sourceMappingURL=download-url.js.map

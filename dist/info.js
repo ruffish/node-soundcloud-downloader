@@ -42,7 +42,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
             r[k] = a[j];
     return r;
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTrackInfoByID = exports.getSetInfo = exports.getInfoBase = void 0;
 var util_1 = require("./util");
 var getTrackInfoBase = function (clientID, axiosRef, ids, playlistID, playlistSecretToken) { return __awaiter(void 0, void 0, void 0, function () {
@@ -83,7 +83,6 @@ var getInfoBase = function (url, clientID, axiosRef) { return __awaiter(void 0, 
                 return [2 /*return*/, res.data];
             case 2:
                 err_2 = _a.sent();
-                console.log(err_2);
                 throw util_1.handleRequestErrs(err_2);
             case 3: return [2 /*return*/];
         }
@@ -211,4 +210,5 @@ var getTrackInfoByID = function (clientID, axiosInstance, ids, playlistID, playl
     });
 }); };
 exports.getTrackInfoByID = getTrackInfoByID;
-exports["default"] = getInfo;
+exports.default = getInfo;
+//# sourceMappingURL=info.js.map

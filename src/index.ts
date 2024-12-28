@@ -2,7 +2,7 @@ import sckey from 'soundcloud-key-fetch'
 
 import getInfo, { getSetInfo, Transcoding, getTrackInfoByID, TrackInfo, User } from './info'
 import filterMedia, { FilterPredicateObject } from './filter-media'
-import { download, fromMediaObj } from './download'
+import { download, fromMediaObj, getMediaUrlOnly } from './download'
 
 import isValidURL, { convertFirebaseURL, isFirebaseURL, isPersonalizedTrackURL, isPlaylistURL, stripMobilePrefix } from './url'
 
@@ -103,6 +103,16 @@ export class SCDL {
   */
   async download (url: string, useDirectLink = true) {
     return download(await this.prepareURL(url), await this.getClientID(), this.axios, useDirectLink)
+  }
+
+  async getMediaUrl(url: string, useDirectLink = true) {
+    console.log('TEST STARTING getMediaUrl');
+    return getMediaUrlOnly(
+      await this.prepareURL(url),
+      await this.getClientID(),
+      this.axios,
+      useDirectLink
+    );
   }
 
   /**

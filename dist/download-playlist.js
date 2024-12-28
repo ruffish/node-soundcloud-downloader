@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadPlaylist = void 0;
 var download_1 = require("./download");
 var info_1 = require("./info");
@@ -59,3 +59,4 @@ var downloadPlaylist = function (url, clientID, axiosInstance) { return __awaite
     });
 }); };
 exports.downloadPlaylist = downloadPlaylist;
+//# sourceMappingURL=download-playlist.js.map

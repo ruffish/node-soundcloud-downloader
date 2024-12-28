@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.kindMismatchError = exports.extractIDFromPersonalizedTrackURL = exports.appendURL = exports.handleRequestErrs = exports.resolveURL = void 0;
 /** @internal @packageDocumentation */
 var url_1 = require("url");
@@ -40,3 +40,4 @@ var extractIDFromPersonalizedTrackURL = function (url) {
 exports.extractIDFromPersonalizedTrackURL = extractIDFromPersonalizedTrackURL;
 var kindMismatchError = function (expected, received) { return new Error("Expected resouce of kind: (" + expected + "), received: (" + received + ")"); };
 exports.kindMismatchError = kindMismatchError;
+//# sourceMappingURL=util.js.map

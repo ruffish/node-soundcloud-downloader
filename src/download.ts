@@ -1,7 +1,7 @@
 /** @internal @packageDocumentation */
 
 import { AxiosInstance } from 'axios'
-import m3u8stream from 'm3u8stream'
+import m3u8stream from 'm3u8stream';
 import { handleRequestErrs, appendURL } from './util'
 import getInfo, { Transcoding } from './info'
 
@@ -19,6 +19,7 @@ export const getMediaURL = async (url: string, clientID: string, axiosInstance: 
 }
 
 export const getProgressiveStream = async (mediaUrl: string, axiosInstance: AxiosInstance) => {
+  console.log("Requesting progressive stream:", mediaUrl);
   const r = await axiosInstance.get(mediaUrl, {
     withCredentials: true,
     responseType: 'stream'
@@ -27,7 +28,16 @@ export const getProgressiveStream = async (mediaUrl: string, axiosInstance: Axio
   return r.data
 }
 
-export const getHLSStream = (mediaUrl: string) => m3u8stream(mediaUrl)
+export const getHLSStream = (mediaUrl: string) => {
+  console.log("Requesting HLS stream:", mediaUrl);
+  return m3u8stream(mediaUrl)
+    .on('response', (response) => {
+      console.log("HLS stream response status:", response.statusCode);
+    })
+    .on('error', (error) => {
+      console.error("HLS stream error:", error.message);
+    });
+}
 
 type fromURLFunctionBase = (url: string, clientID: string,
   getMediaURLFunction: (url: string, clientID: string, axiosInstance: AxiosInstance) => Promise<string>,
@@ -62,6 +72,9 @@ export const fromMediaObjBase = async (media: Transcoding, clientID: string,
   fromURLFunction: typeof fromURL,
   axiosInstance: AxiosInstance): Promise<any | m3u8stream.Stream> => {
   if (!validatemedia(media)) throw new Error('Invalid media object provided')
+
+  console.log("Media object transcodings:", JSON.stringify(media, null, 2));
+  console.log("Media URL: ", media.url);
   return await fromURLFunction(media.url, clientID, axiosInstance)
 }
 
@@ -77,21 +90,83 @@ export const fromDownloadLink = async (id: number, clientID: string, axiosInstan
 }
 
 /** @internal */
-export const download = async (url: string, clientID: string, axiosInstance: AxiosInstance, useDownloadLink = true) => {
-  const info = await getInfo(url, clientID, axiosInstance)
+export const download = async (url: string, clientID: string, axiosInstance: AxiosInstance, useDownloadLink = false) => {
+  const info = await getInfo(url, clientID, axiosInstance);
+  
   if (info.downloadable && useDownloadLink) {
-    // Some tracks have `downloadable` set to true but will return a 404
-    // when using download API route.
+    // Attempt direct download if `downloadable` is true
     try {
-      return await fromDownloadLink(info.id, clientID, axiosInstance)
+      return await fromDownloadLink(info.id, clientID, axiosInstance);
     } catch (err) {
+      console.error("Error with direct download:", err.message);
     }
   }
 
-  return await fromMediaObj(info.media.transcodings[0], clientID, axiosInstance)
-}
+  // Find the first compatible transcoding (progressive or HLS)
+  const compatibleTranscoding = info.media.transcodings.find(transcoding =>
+    transcoding.format.protocol === "progressive" || transcoding.format.protocol === "hls"
+  );
+
+  if (!compatibleTranscoding) {
+    throw new Error("No compatible transcoding found (progressive or hls).");
+  }
+
+  console.log(`Using transcoding: ${JSON.stringify(compatibleTranscoding, null, 2)}`);
+
+  // Use the found transcoding
+  return await fromMediaObj(compatibleTranscoding, clientID, axiosInstance);
+};
 
 const validatemedia = (media: Transcoding) => {
-  if (!media.url || !media.format) return false
-  return true
-}
+  if (!media.url || !media.format) {
+    console.error("Invalid media object:", media);
+    return false;
+  }
+  console.log("Valid media object:", media);
+  return true;
+};
+
+/**
+ * Return the media.url for a track, using the same signature as `download`.
+ */
+export const getMediaUrlOnly = async (
+  url: string,
+  clientID: string,
+  axiosInstance: AxiosInstance,
+  useDownloadLink = false
+): Promise<string> => {
+  // 1) Fetch track info
+  const info = await getInfo(url, clientID, axiosInstance);
+
+  // 2) (Optional) If the track is downloadable and useDownloadLink is true,
+  //    normally you'd attempt direct download. But since we only want
+  //    the media URL from a transcoding, we can skip that logic or leave
+  //    it out. (This block is commented out for clarity.)
+  /*
+  if (info.downloadable && useDownloadLink) {
+    try {
+      // This normally returns a "download" stream, not a media URL.
+      // So we won't use it here. Just showing how it would normally look:
+      const downloadData = await fromDownloadLink(info.id, clientID, axiosInstance);
+      // But that doesn't yield a .url. So we skip returning here.
+    } catch (err: any) {
+      console.error("Error with direct download:", err.message);
+    }
+  }
+  */
+
+  // 3) Find the first progressive or hls transcoding
+  const compatibleTranscoding = info.media.transcodings.find(
+    (transcoding) =>
+      transcoding.format.protocol === 'progressive' ||
+      transcoding.format.protocol === 'hls'
+  );
+
+  if (!compatibleTranscoding) {
+    throw new Error('No compatible transcoding found (progressive or hls).');
+  }
+
+  const mediaUrl = getMediaURL(compatibleTranscoding.url, clientID, axiosInstance);
+  
+  return mediaUrl
+};

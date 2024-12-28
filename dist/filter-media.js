@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 /** @internal */
 var filterMedia = function (media, predicateObj) {
     return media.filter(function (_a) {
@@ -12,4 +12,5 @@ var filterMedia = function (media, predicateObj) {
         return match;
     });
 };
-exports["default"] = filterMedia;
+exports.default = filterMedia;
+//# sourceMappingURL=filter-media.js.map
